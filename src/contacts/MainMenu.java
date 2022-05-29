@@ -58,17 +58,15 @@ public class MainMenu {
         }
     }
 
-    //implement edit Records
     private void editRecord() {
         if (this.phoneBook.getPhoneBook().isEmpty()) {
             System.out.println("No records to edit!");
             return;
         }
+
         this.listRecords();
-        System.out.println("Select a record: ");
-        int record = Integer.parseInt(scanner.nextLine());
-        System.out.println("Select a field (name, surname, number): ");
-        String selection = scanner.nextLine();
+        this.getInputToEdit();
+    
     }
 
     private void countRecords() {
@@ -90,11 +88,11 @@ public class MainMenu {
         String phoneNumber = scanner.nextLine();
 
         if (this.checkNumberValidity(phoneNumber)) {
-            System.out.println("The record added.");
+            System.out.println("Record has been added.");
             return new Contact(name, surname, phoneNumber);
         }
 
-        System.out.println("Wrong number format!\nThe record added.");
+        System.out.println("Wrong number format!\nRecord has been added.");
         return new Contact(name, surname, "[no number]");
     }
 
@@ -103,5 +101,40 @@ public class MainMenu {
         Matcher matcher = pattern.matcher(phoneNumber);
 
         return matcher.find();
+    }
+
+    public void getInputToEdit() {
+        System.out.println("Select a record: ");
+        int recordNumber = Integer.parseInt(scanner.nextLine());
+        System.out.println("Select a field (name, surname, number): ");
+        String field = scanner.nextLine();
+        
+        this.editRecord(recordNumber, field);
+    }
+
+    public void editRecord(int recordNumber, String field) {
+        if (field.equals("name")) {
+            System.out.println("Enter name: ");
+            this.phoneBook.getPhoneBook().get(recordNumber - 1).setName(scanner.nextLine());
+            System.out.println("Selected record has been updated!");
+        } else if (field.equals("surname")) {
+            System.out.println("Enter surname: ");
+            this.phoneBook.getPhoneBook().get(recordNumber - 1).setSurname(scanner.nextLine());
+            System.out.println("Selected record has been updated!");
+        } else if (field.equals("number")) {
+            System.out.println("Enter number: ");
+            String phoneNumber = scanner.nextLine();
+
+            if (this.checkNumberValidity(phoneNumber)) {
+                this.phoneBook.getPhoneBook().get(recordNumber - 1).setPhoneNumber(phoneNumber);
+                System.out.println("Selected record has been updated!");
+            } else {
+                System.out.println("Wrong number format!\nTry again.");
+                this.editRecord(recordNumber, field);
+            }
+        } else {
+            System.out.println("Wrong input. Try again. ");
+            this.getInputToEdit();
+        }
     }
 }
