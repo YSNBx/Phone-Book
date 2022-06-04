@@ -1,18 +1,25 @@
-package contacts;
+package contacts.ui;
+
+import contacts.components.Contact;
+import contacts.uicontroller.MenuController;
+import contacts.components.PhoneBook;
 
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class MainMenu {
+public class MainMenu implements SuperInterface {
     private final PhoneBook phoneBook;
     private final Scanner scanner;
+    private final MenuController controller;
 
-    public MainMenu(PhoneBook phoneBook) {
+    public MainMenu(PhoneBook phoneBook, MenuController controller) {
         this.phoneBook = phoneBook;
         this.scanner = new Scanner(System.in);
+        this.controller = controller;
     }
 
+    @Override
     public void start() {
         while (true) {
             System.out.println("Enter action (add, remove, edit, count, list, exit)");
@@ -21,7 +28,6 @@ public class MainMenu {
             if (command.equals("exit")) {
                 break;
             }
-
             this.evaluate(command);
         }
     }
@@ -55,7 +61,10 @@ public class MainMenu {
     private void removeRecord() {
         if (this.phoneBook.getPhoneBook().isEmpty()) {
             System.out.println("No records to remove!");
+            return;
         }
+        this.listRecords();
+        this.getInputToRemove();
     }
 
     private void editRecord() {
@@ -63,10 +72,8 @@ public class MainMenu {
             System.out.println("No records to edit!");
             return;
         }
-
         this.listRecords();
         this.getInputToEdit();
-    
     }
 
     private void countRecords() {
@@ -74,6 +81,10 @@ public class MainMenu {
     }
 
     private void listRecords() {
+        if (this.phoneBook.getPhoneBook().isEmpty()) {
+            System.out.println("This Phone Book has no records!");
+            return;
+        }
         for (int i = 0; i < this.phoneBook.getContactsCount(); i++) {
             System.out.println(i + 1 + ". " + this.phoneBook.getPhoneBook().get(i));
         }
@@ -97,10 +108,10 @@ public class MainMenu {
     }
 
     public boolean checkNumberValidity(String phoneNumber) {
-        Pattern pattern = Pattern.compile("^\\+?(\\(\\w+\\)|\\w+[ -]\\(\\w{2,}\\)|\\w+)([ -]\\w{2,})*");
+        Pattern pattern = Pattern.compile("^\\+?(\\(\\w+\\)|\\w+[-\\s]\\(\\w{2,}\\)|\\w+)([-\\s]\\w{2,})*");
         Matcher matcher = pattern.matcher(phoneNumber);
 
-        return matcher.find();
+        return matcher.matches();
     }
 
     public void getInputToEdit() {
@@ -108,7 +119,7 @@ public class MainMenu {
         int recordNumber = Integer.parseInt(scanner.nextLine());
         System.out.println("Select a field (name, surname, number): ");
         String field = scanner.nextLine();
-        
+
         this.editRecord(recordNumber, field);
     }
 
@@ -129,12 +140,17 @@ public class MainMenu {
                 this.phoneBook.getPhoneBook().get(recordNumber - 1).setPhoneNumber(phoneNumber);
                 System.out.println("Selected record has been updated!");
             } else {
-                System.out.println("Wrong number format!\nTry again.");
-                this.editRecord(recordNumber, field);
+                System.out.println("Wrong number format!");
+                this.phoneBook.getPhoneBook().get(recordNumber - 1).setPhoneNumber("[no number]");
             }
         } else {
             System.out.println("Wrong input. Try again. ");
             this.getInputToEdit();
         }
+    }
+
+    public void getInputToRemove() {
+        System.out.println("Select a record: ");
+        this.phoneBook.getPhoneBook().remove(Integer.parseInt(scanner.nextLine()) - 1);
     }
 }
